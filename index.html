@@ -41,21 +41,26 @@ uy:{n:'Truco Uruguayo',tgt:30,lad:[1,2,3,4],nm:['','Truco','Retruco','Vale cuatr
 br:{n:'Truco Brasileño (Mineiro)',tgt:12,lad:[1,3,6,9,12],nm:['','Truco','Seis','Nove','Doze'],env:0,flor:0}};
 const TUT={
 arg:`<p><b>Objetivo:</b> llegar a 15 puntos. Mazo español de 40 cartas (sin 8 ni 9). Cada mano se reparten 3 cartas y se juegan hasta 3 bazas; gana la mano quien gane 2. Si se empata (parda) la primera baza, decide la segunda.</p><p><b>Orden de las cartas (mayor a menor):</b> 1🗡️, 1🌿, 7🗡️, 7🪙, los 3, los 2, 1🍷 y 1🪙, 12, 11, 10, 7🍷 y 7🌿, 6, 5, 4.</p><p><b>Truco:</b> Truco (2 pts) → Retruco (3) → Vale cuatro (4). El rival puede querer, subir o no querer (el que cantó suma los puntos anteriores).</p><p><b>Envido</b> (solo en la 1.ª baza): Envido 2 pts, Real Envido 3, Falta Envido (lo que falta para ganar). Tanto = 20 + las dos cartas del mismo palo (10, 11 y 12 valen 0); sin palo repetido, vale la carta más alta. Gana el tanto mayor; si empatan, el mano. En esta versión no hay flor.</p>`,
-uy:`<p><b>Objetivo:</b> llegar a 30 puntos. Mismo mazo y mismo orden de cartas que el argentino (1🗡️, 1🌿, 7🗡️, 7🪙, 3, 2, 1🍷/1🪙, 12, 11, 10, 7🍷/7🌿, 6, 5, 4).</p><p><b>Truco:</b> Truco (2) → Retruco (3) → Vale cuatro (4), con las mismas reglas de querer / no querer / subir. Gana la mano quien gane 2 de 3 bazas.</p><p><b>Envido:</b> Envido (2), Real Envido (3) y Falta Envido en la primera baza.</p><p><b>Flor:</b> si recibís 3 cartas del mismo palo ganás 3 puntos automáticamente (si ambos tienen flor, el mayor gana 6) y ese turno no hay envido.</p>`,
-br:`<p><b>Objetivo:</b> llegar a 12 puntos. Mazo de 40 cartas (A–7, Q=10, J=11, K=12). No hay envido. Gana la mano quien gane 2 de 3 bazas; la primera empatada la define la segunda.</p><p><b>Manilhas fijas (mayor a menor):</b> 4🌿 (zap), 7🍷, 1🗡️, 7🪙; luego los 3, los 2, los ases restantes, K, J, Q, los 7 restantes, 6, 5 y los 4 restantes.</p><p><b>Apuestas:</b> la mano vale 1. Truco → 3, Seis → 6, Nove → 9, Doze → 12. El rival puede aceitar (aceptar), aumentar o correr (rendirse: el que cantó suma lo que valía antes). Esta es la versión Mineiro; la Paulista usa una carta «vira».</p>`};
+uy:`<p><b>Objetivo:</b> llegar a 30 puntos. Mazo español de 40 cartas. Gana la mano quien gane 2 de 3 bazas, con Truco (2) → Retruco (3) → Vale cuatro (4) y Envido (2), Real Envido (3) y Falta Envido en la primera baza.</p><p><b>La muestra:</b> después de repartir se da vuelta una carta. Su palo define las <b>piezas</b>: el 2, 4, 5, 11 y 10 de ese palo. Si la muestra es una de esas cartas, el 12 de ese palo hace de ella.</p><p><b>Orden de las cartas (mayor a menor):</b> piezas (2, 4, 5, 11, 10 de la muestra), luego las matas 1🗡️, 1🌿, 7🗡️, 7🪙, los 3, los 2, 1🍷 y 1🪙, 12, 11, 10, 7🍷 y 7🌿, 6, 5, 4.</p><p><b>Piezas en el envido:</b> valen 10, 9, 8, 7 y 7 (2, 4, 5, 11, 10) y sirven de comodín de palo: tener una pieza te da siempre envido de dos cartas (20 + pieza + otra carta).</p><p><b>Flor:</b> 3 cartas del mismo palo, usando las piezas como comodín, dan 3 puntos automáticos (si ambos tienen flor, el mayor gana 6) y ese turno no hay envido.</p>`,
+br:`<p><b>Objetivo:</b> llegar a 12 puntos. Baraja francesa de 40 cartas (A, 2, 3, 4, 5, 6, 7, Q, J, K; sin 8, 9 ni 10). No hay envido. Gana la mano quien gane 2 de 3 bazas; si se empata la primera, la define la segunda.</p><p><b>Manilhas fijas (mayor a menor):</b> 4♣ (zap), 7♥, A♠, 7♦; luego los 3, los 2, los ases restantes (A♥, A♦, A♣), K, J, Q, 7♠ y 7♣, 6, 5 y los 4 restantes.</p><p><b>Apuestas:</b> la mano vale 1. Truco → 3, Seis → 6, Nove → 9, Doze → 12. El rival puede aceitar (aceptar), aumentar o correr (rendirse: el que cantó suma lo que valía antes). Esta es la versión Mineiro; la Paulista usa una carta «vira».</p>`};
 const $=s=>document.querySelector(s);
 let G=null,mode='',sel='arg',room=null,shownFor=-1,tm=0,status='';
 const cfg=()=>CFG[G.v],nm=s=>G.nm[s],V=c=>c.n>9?0:c.n;
-function str(c,v){const{n,s}=c;if(v=='br'){if(n==4&&s==1)return 14;if(n==7&&s==3)return 13;if(n==1&&s==0)return 12;if(n==7&&s==2)return 11}else{if(n==1&&s==0)return 14;if(n==1&&s==1)return 13;if(n==7&&s==0)return 12;if(n==7&&s==2)return 11}
+function str(c,v){const{n,s}=c;if(v=='uy'){const p=pn(c);if(p)return PR[p]}if(v=='br'){if(n==4&&s==1)return 14;if(n==7&&s==3)return 13;if(n==1&&s==0)return 12;if(n==7&&s==2)return 11}else{if(n==1&&s==0)return 14;if(n==1&&s==1)return 13;if(n==7&&s==0)return 12;if(n==7&&s==2)return 11}
 if(n==3)return 10;if(n==2)return 9;if(n==1)return 8;if(n==12)return 7;if(n==11)return 6;if(n==10)return 5;if(n==7)return 4;return n==6?3:n==5?2:1}
-function ev(h){let b=0;for(const a of h)for(const c of h)if(a!==c&&a.s===c.s)b=Math.max(b,20+V(a)+V(c));for(const a of h)b=Math.max(b,V(a));return b}
+const PZ=[2,4,5,10,11],PR={2:20,4:19,5:18,11:17,10:16},PV={2:10,4:9,5:8,11:7,10:7};
+function pn(c){const M=G&&G.m;if(!M||c.s!=M.s)return 0;if(PZ.includes(c.n))return c.n;return c.n==12&&PZ.includes(M.n)?M.n:0}
+const pval=c=>pn(c)?PV[pn(c)]:V(c);
+function flor(h){if(new Set(h.filter(c=>!pn(c)).map(c=>c.s)).size>1)return-1;return 20+h.reduce((a,c)=>a+pval(c),0)}
+function ev(h){let b=0;for(const a of h)for(const c of h)if(a!==c){if(pn(a))b=Math.max(b,20+pval(a)+pval(c));else if(!pn(c)&&a.s===c.s)b=Math.max(b,20+V(a)+V(c))}
+for(const a of h)if(!pn(a))b=Math.max(b,V(a));return b}
 const log=t=>{G.log.push(t);if(G.log.length>6)G.log.shift()};
 function add(w,p){G.sc[w]+=p;if(G.sc[w]>=cfg().tgt){G.sc[w]=cfg().tgt;G.over=true;G.win=w;log(nm(w)+' gana la partida')}}
 function deal(){const d=[];for(let s=0;s<4;s++)for(const n of[1,2,3,4,5,6,7,10,11,12])d.push({n,s});
 for(let i=39;i>0;i--){const j=Math.random()*(i+1)|0;[d[i],d[j]]=[d[j],d[i]]}
-G.h=[d.slice(0,3),d.slice(3,6)];G.o=[[...G.h[0]],[...G.h[1]]];G.tb=[[],[]];G.rd=0;G.r=[];G.turn=G.mano;G.ti=0;G.rz=-1;G.pend=null;G.ed=false;G.ph='play';
+G.m=G.v=='uy'?d[6]:null;G.h=[d.slice(0,3),d.slice(3,6)];G.o=[[...G.h[0]],[...G.h[1]]];G.tb=[[],[]];G.rd=0;G.r=[];G.turn=G.mano;G.ti=0;G.rz=-1;G.pend=null;G.ed=false;G.ph='play';
 log('— Nueva mano. Mano: '+nm(G.mano));
-if(cfg().flor){const f=G.o.map(h=>h.every(c=>c.s==h[0].s)?20+h.reduce((a,c)=>a+V(c),0):-1);
+if(cfg().flor){const f=G.o.map(flor);
 if(f[0]>=0||f[1]>=0){G.ed=true;let w,p;if(f[0]>=0&&f[1]>=0){w=f[0]>f[1]||(f[0]==f[1]&&G.mano==0)?0:1;p=6}else{w=f[0]>=0?0:1;p=3}log(nm(w)+' tiene flor (+'+p+')');add(w,p)}}}
 function newGame(v,m){G={v,sc:[0,0],mano:0,over:false,log:[],nm:m=='cpu'?['Vos','CPU']:['Jugador 1','Jugador 2']};deal()}
 const actor=()=>G.pend?1-G.pend.from:G.turn;
@@ -93,13 +98,13 @@ const x=str(G.tb[0][G.rd],G.v),w=idx.find(i=>S[i]>x);return{t:'p',i:w!==undefine
 function bc(){if(mode=='host'&&room&&G)room.emit('state',{...G,o:0,h:[G.h[0].map(()=>({})),G.h[1]]}).catch(()=>{})}
 const vs=()=>mode=='guest'?1:mode=='hot'?(G.ph=='play'?actor():0):0;
 function send(a){if(mode=='guest'){room.emit('act',{a}).catch(()=>{});return}doAct(vs(),a);render();bc()}
-function card(c,i,click){return `<div class="c${click?' h':''}" ${click?`onclick="send({t:'p',i:${i}})"`:''} style="color:${COL[c.s]}"><span>${c.n}</span><small>${SU[c.s]}</small></div>`}
+function card(c,i,click){const f=G.v=='br',L=f?({1:'A',10:'Q',11:'J',12:'K'}[c.n]||c.n):c.n,S=f?['♠','♣','♦','♥'][c.s]:SU[c.s],K=f?(c.s>1?'#c62828':'#111'):COL[c.s];return `<div class="c${click?' h':''}" ${click?`onclick="send({t:'p',i:${i}})"`:''} style="color:${K}${pn(c)?';box-shadow:0 0 0 3px gold':''}"><span>${L}</span><small>${S}</small></div>`}
 const back=n=>'<div class="c b"></div>'.repeat(n);
 function render(){const A=$('#app');if(!G){menu(A);return}
 const me=vs(),op=1-me,C=cfg(),ac=actor(),mine=G.ph=='play'&&ac==me;
 if(mode=='hot'){if(G.ph=='end')shownFor=-1;if(G.ph=='play'&&!G.over&&shownFor!=me){A.innerHTML=`<div class="cov"><h2>Turno de ${nm(me)}</h2><p>Pasale el dispositivo y que el otro jugador no mire.</p><button onclick="shownFor=${me};render()">Listo, soy ${nm(me)}</button></div>`;return}}
 let t='';for(let i=0;i<3;i++){const o=G.tb[op][i],m=G.tb[me][i];t+=`<div class="slot">${o?card(o):'<div class="c e"></div>'}${m?card(m):'<div class="c e"></div>'}</div>`}
-let b='';
+let b='';const mu=G.m?`<div class="log" style="text-align:center;margin:0 0 6px">Muestra: <b>${G.m.n}${SU[G.m.s]}</b> · piezas: 2, 4, 5, 11 y 10 de ${SU[G.m.s]}${PZ.includes(G.m.n)?` · el 12 de ${SU[G.m.s]} hace de ${G.m.n}`:''}</div>`:'';
 if(G.over)b=`<b>${G.win==me?'¡Ganaste la partida!':'Perdiste la partida'}</b><br><button onclick="quit()">Volver al menú</button>`;
 else if(G.ph=='end')b=`<button onclick="send({t:'next'})">Siguiente mano</button>`;
 else if(G.pend&&ac==me){const p=G.pend;
@@ -112,7 +117,7 @@ b+=`<button class="s" onclick="send({t:'m'})">${G.v=='br'?'Correr':'Al mazo'}</b
 else b='Turno de '+nm(ac)+'…';
 A.innerHTML=`<div class="top"><b>${C.n} · a ${C.tgt}</b><button class="s" onclick="quit()">Salir</button></div>
 <div class="sc">${mode=='cpu'||mode=='host'||mode=='guest'?'Vos':nm(me)} <b>${G.sc[me]}</b> · ${nm(op)} <b>${G.sc[op]}</b></div>
-<div class="felt"><div class="row">${back(G.h[op].length)}</div><div class="tbl">${t}</div>
+${mu}<div class="felt"><div class="row">${back(G.h[op].length)}</div><div class="tbl">${t}</div>
 <div class="row">${G.h[me].map((c,i)=>card(c,i,mine&&!G.pend)).join('')}</div></div>
 <div class="msg">${b}</div><div class="log">${G.log.slice(-5).reverse().map(x=>`<div>${esc(x)}</div>`).join('')}</div>`;
 clearTimeout(tm);if(mode=='cpu'&&!G.over&&G.ph=='play'&&actor()==1)tm=setTimeout(()=>{doAct(1,cpuMove());render()},950)}
