@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Truco</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#f4efe6;--fg:#1d1b17;--pan:#fff;--mut:#6b655a;--acc:#b3261e;--felt:#1f6b45;--ln:#d8d0c0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14120f;--fg:#f1ece2;--pan:#201d18;--mut:#a39b8b;--acc:#ef6a5f;--felt:#14503a;--ln:#38332a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14120f;--fg:#f1ece2;--pan:#201d18;--mut:#a39b8b;--acc:#ef6a5f;--felt:#14503a;--ln:#38332a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:640px;margin:0 auto;padding:14px}
+h1{font-size:26px;margin:6px 0 2px}.sub{color:var(--mut);margin:0 0 14px}
+.opt{background:var(--pan);border:2px solid var(--ln);border-radius:12px;padding:10px 12px;margin:8px 0}
+.opt.on{border-color:var(--acc)}
+.opt label{font-weight:700;display:flex;gap:8px;align-items:center;cursor:pointer}
+details{margin-top:6px;color:var(--mut);font-size:14px}summary{cursor:pointer;color:var(--acc)}
+details p{margin:6px 0}
+button{font:inherit;border:0;border-radius:10px;padding:10px 14px;background:var(--acc);color:#fff;cursor:pointer;margin:4px 4px 4px 0}
+button.s{background:var(--pan);color:var(--fg);border:1px solid var(--ln)}
+input[type=text]{font:inherit;padding:9px;border-radius:10px;border:1px solid var(--ln);background:var(--pan);color:var(--fg);width:150px;text-transform:lowercase}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sc{text-align:center;font-size:18px;margin:6px 0}
+.felt{background:var(--felt);border-radius:16px;padding:12px 8px;color:#fff}
+.row{display:flex;justify-content:center;gap:8px;min-height:90px}
+.tbl{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;justify-items:center;margin:8px 0}
+.slot{display:flex;flex-direction:column;gap:6px;align-items:center}
+.c{width:58px;height:84px;border-radius:8px;background:#fffdf6;border:1px solid #0004;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:21px;line-height:1.1;user-select:none}
+.c small{font-size:22px}.c.b{background:repeating-linear-gradient(45deg,#8c2a2a,#8c2a2a 6px,#6e1f1f 6px,#6e1f1f 12px)}
+.c.e{background:#ffffff14;border:1px dashed #fff5}
+.c.h{cursor:pointer;transition:transform .12s}.c.h:hover{transform:translateY(-8px)}
+.msg{background:var(--pan);border:1px solid var(--ln);border-radius:12px;padding:8px 12px;margin:10px 0;min-height:40px}
+.log{font-size:13px;color:var(--mut);margin:6px 0}
+.cov{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;z-index:9}
+.cov h2{margin:0 0 12px}
+</style></head><body><main id="app"></main>
+<script>
+const SU=['🗡️','🌿','🪙','🍷'],COL=['#1d4e89','#2e7d32','#b8860b','#b3261e'];
+const CFG={
+arg:{n:'Truco Argentino',tgt:15,lad:[1,2,3,4],nm:['','Truco','Retruco','Vale cuatro'],env:1,flor:0},
+uy:{n:'Truco Uruguayo',tgt:30,lad:[1,2,3,4],nm:['','Truco','Retruco','Vale cuatro'],env:1,flor:1},
+bp:{n:'Truco Brasileño (Paulista)',tgt:12,lad:[1,3,6,9,12],nm:['','Truco','Seis','Nove','Doze'],env:0,flor:0},
+br:{n:'Truco Brasileño (Mineiro)',tgt:12,lad:[1,3,6,9,12],nm:['','Truco','Seis','Nove','Doze'],env:0,flor:0}};
+const TUT={
+arg:`<p><b>Objetivo:</b> llegar a 15 puntos. Mazo español de 40 cartas (sin 8 ni 9). Cada mano se reparten 3 cartas y se juegan hasta 3 bazas; gana la mano quien gane 2. Si se empata (parda) la primera baza, decide la segunda.</p><p><b>Orden de las cartas (mayor a menor):</b> 1🗡️, 1🌿, 7🗡️, 7🪙, los 3, los 2, 1🍷 y 1🪙, 12, 11, 10, 7🍷 y 7🌿, 6, 5, 4.</p><p><b>Truco:</b> Truco (2 pts) → Retruco (3) → Vale cuatro (4). El rival puede querer, subir o no querer (el que cantó suma los puntos anteriores).</p><p><b>Envido</b> (solo en la 1.ª baza): Envido 2 pts, Real Envido 3, Falta Envido (lo que falta para ganar); se puede subir encadenando (Envido + Envido + Real Envido…); si no se quiere, el que cantó suma lo apostado antes. Tanto = 20 + las dos cartas del mismo palo (10, 11 y 12 valen 0); sin palo repetido, vale la carta más alta. Gana el tanto mayor; si empatan, el mano. En esta versión no hay flor.</p>`,
+bp:`<p><b>Objetivo:</b> llegar a 12 puntos. Baraja francesa de 40 cartas (A–7, Q, J, K). No hay envido. Gana la mano quien gane 2 de 3 bazas; si se empata la primera, la define la segunda.</p><p><b>La vira:</b> después de repartir se da vuelta una carta. La <b>manilha</b> es la carta siguiente en el orden 4, 5, 6, 7, Q, J, K, A, 2, 3 (tras el 3 vuelve el 4). Entre manilhas manda ♣ (zap), luego ♥, ♠ y ♦. Después valen 3, 2, A, K, J, Q, 7, 6, 5, 4 (cartas iguales empatan).</p><p><b>Apuestas:</b> Truco → 3, Seis → 6, Nove → 9, Doze → 12. Podés aceitar, aumentar o correr.</p><p><b>Mão de onze:</b> con 11 puntos mirás tus cartas y decidís jugar (la mano vale 3, sin truco) o correr (el rival suma 1). Si ambos tienen 11 es <b>mão de ferro</b>: cartas a ciegas y quien gane la mano gana la partida.</p>`,
+uy:`<p><b>Objetivo:</b> llegar a 30 puntos. Mazo español de 40 cartas. Gana la mano quien gane 2 de 3 bazas, con Truco (2) → Retruco (3) → Vale cuatro (4) y Envido (2), Real Envido (3) y Falta Envido en la primera baza; el envido se puede subir (Envido + Envido, + Real, + Falta).</p><p><b>La muestra:</b> después de repartir se da vuelta una carta. Su palo define las <b>piezas</b>: el 2, 4, 5, 11 y 10 de ese palo. Si la muestra es una de esas cartas, el 12 de ese palo hace de ella.</p><p><b>Orden de las cartas (mayor a menor):</b> piezas (2, 4, 5, 11, 10 de la muestra), luego las matas 1🗡️, 1🌿, 7🗡️, 7🪙, los 3, los 2, 1🍷 y 1🪙, 12, 11, 10, 7🍷 y 7🌿, 6, 5, 4.</p><p><b>Piezas en el envido:</b> valen 10, 9, 8, 7 y 7 (2, 4, 5, 11, 10) y sirven de comodín de palo: tener una pieza te da siempre envido de dos cartas (20 + pieza + otra carta).</p><p><b>Flor:</b> 3 cartas del mismo palo, usando las piezas como comodín, dan 3 puntos automáticos (si ambos tienen flor, el mayor gana 6) y ese turno no hay envido.</p>`,
+br:`<p><b>Objetivo:</b> llegar a 12 puntos. Baraja francesa de 40 cartas (A, 2, 3, 4, 5, 6, 7, Q, J, K; sin 8, 9 ni 10). No hay envido. Gana la mano quien gane 2 de 3 bazas; si se empata la primera, la define la segunda.</p><p><b>Manilhas fijas (mayor a menor):</b> 4♣ (zap), 7♥, A♠, 7♦; luego los 3, los 2, los ases restantes (A♥, A♦, A♣), K, J, Q, 7♠ y 7♣, 6, 5 y los 4 restantes.</p><p><b>Apuestas:</b> la mano vale 1. Truco → 3, Seis → 6, Nove → 9, Doze → 12. El rival puede aceitar (aceptar), aumentar o correr (rendirse: el que cantó suma lo que valía antes). <b>Mão de onze:</b> con 11 puntos podés jugar (vale 3, sin truco) o correr (el rival suma 1); con 11 contra 11, mão de ferro a ciegas. Esta es la versión Mineiro; la Paulista usa una carta «vira».</p>`};
+const $=s=>document.querySelector(s);
+const BRZ=()=>G.v=='br'||G.v=='bp',T=(a,b)=>BRZ()?b:a,EN={e:'Envido',r:'Real Envido',f:'Falta Envido'},OR=[4,5,6,7,10,11,12,1,2,3];
+const FC=n=>({1:'A',10:'Q',11:'J',12:'K'}[n]||n),mn=()=>OR[(OR.indexOf(G.m.n)+1)%10];
+function envOK(c,x){const l=c[c.length-1];return x=='e'?l=='e'&&c.filter(y=>y=='e').length<2:x=='r'?l=='e':l!='f'}
+let G=null,mode='',sel='arg',room=null,shownFor=-1,tm=0,status='';
+const cfg=()=>CFG[G.v],nm=s=>G.nm[s],V=c=>c.n>9?0:c.n;
+function str(c,v){const{n,s}=c;if(v=='bp')return n==mn()?{1:14,3:13,0:12,2:11}[s]:OR.indexOf(n)+1;if(v=='uy'){const p=pn(c);if(p)return PR[p]}if(v=='br'){if(n==4&&s==1)return 14;if(n==7&&s==3)return 13;if(n==1&&s==0)return 12;if(n==7&&s==2)return 11}else{if(n==1&&s==0)return 14;if(n==1&&s==1)return 13;if(n==7&&s==0)return 12;if(n==7&&s==2)return 11}
+if(n==3)return 10;if(n==2)return 9;if(n==1)return 8;if(n==12)return 7;if(n==11)return 6;if(n==10)return 5;if(n==7)return 4;return n==6?3:n==5?2:1}
+const PZ=[2,4,5,10,11],PR={2:20,4:19,5:18,11:17,10:16},PV={2:10,4:9,5:8,11:7,10:7};
+function pn(c){const M=G&&G.m;if(!M||G.v!='uy'||c.s!=M.s)return 0;if(PZ.includes(c.n))return c.n;return c.n==12&&PZ.includes(M.n)?M.n:0}
+const pval=c=>pn(c)?PV[pn(c)]:V(c);
+function flor(h){if(new Set(h.filter(c=>!pn(c)).map(c=>c.s)).size>1)return-1;return 20+h.reduce((a,c)=>a+pval(c),0)}
+function ev(h){let b=0;for(const a of h)for(const c of h)if(a!==c){if(pn(a))b=Math.max(b,20+pval(a)+pval(c));else if(!pn(c)&&a.s===c.s)b=Math.max(b,20+V(a)+V(c))}
+for(const a of h)if(!pn(a))b=Math.max(b,V(a));return b}
+const log=t=>{G.log.push(t);if(G.log.length>6)G.log.shift()};
+function add(w,p){G.sc[w]+=p;if(G.sc[w]>=cfg().tgt){G.sc[w]=cfg().tgt;G.over=true;G.win=w;log(nm(w)+' gana la partida')}}
+function deal(){const d=[];for(let s=0;s<4;s++)for(const n of[1,2,3,4,5,6,7,10,11,12])d.push({n,s});
+for(let i=39;i>0;i--){const j=Math.random()*(i+1)|0;[d[i],d[j]]=[d[j],d[i]]}
+G.m=G.v=='uy'||G.v=='bp'?d[6]:null;G.h=[d.slice(0,3),d.slice(3,6)];G.o=[[...G.h[0]],[...G.h[1]]];G.tb=[[],[]];G.rd=0;G.r=[];G.turn=G.mano;G.ti=0;G.rz=-1;G.pend=null;G.ed=false;G.ph='play';
+log(T('— Nueva mano. Mano: ','— Nova mão. Mão: ')+nm(G.mano));G.fix=0;G.ferro=false;
+if(BRZ()){const e=G.sc.map(x=>x==11);if(e[0]&&e[1]){G.ferro=true;G.fix=cfg().tgt;log('¡Mão de ferro! Cartas a ciegas: quien gane la mano gana la partida')}else if(e[0]||e[1]){G.dec=e[0]?0:1;G.ph='onze';G.fix=3;log('Mão de onze: '+nm(G.dec)+' decide si juega (vale 3) o corre')}}
+if(cfg().flor){const f=G.o.map(flor);
+if(f[0]>=0||f[1]>=0){G.ed=true;let w,p;if(f[0]>=0&&f[1]>=0){w=f[0]>f[1]||(f[0]==f[1]&&G.mano==0)?0:1;p=6}else{w=f[0]>=0?0:1;p=3}log(nm(w)+' tiene flor (+'+p+')');add(w,p)}}}
+function newGame(v,m){G={v,sc:[0,0],mano:0,over:false,log:[],nm:v=='br'||v=='bp'?(m=='cpu'?['Você','CPU']:['Jogador 1','Jogador 2']):m=='cpu'?['Vos','CPU']:['Jugador 1','Jugador 2']};deal()}
+const actor=()=>G.ph=='onze'?G.dec:G.pend?1-G.pend.from:G.turn;
+const canT=s=>G.ti+1<cfg().lad.length&&(G.rz<0||G.rz==s)&&!G.pend&&!G.fix;
+const canE=s=>cfg().env&&!G.ed&&G.rd==0&&G.ti==0&&G.tb[s][0]===undefined&&!G.pend;
+function decide(){const r=G.r,w=[0,0];r.forEach(x=>x>=0&&w[x]++);if(w[0]>1)return 0;if(w[1]>1)return 1;
+if(r.length>1){if(r[0]<0&&r[1]>=0)return r[1];if(r[0]>=0&&r[1]<0)return r[0]}
+if(r.length>2)return r[0]>=0?r[0]:r[2]>=0?r[2]:G.mano;return-1}
+function endHand(w,p){log(nm(w)+T(' gana la mano (+',' ganha a mão (+')+p+')');add(w,p);G.ph='end'}
+function doAct(s,a){if(!G||G.over||!a)return;
+if(a.t=='next'){if(G.ph=='end'){G.mano=1-G.mano;deal()}return}
+if(G.ph=='onze'){if(s==G.dec){if(a.t=='q'){G.ph='play';log(nm(s)+T(' juega la mano de once',' joga a mão de onze'))}else if(a.t=='n'){log(nm(s)+T(' corre',' correu'));endHand(1-s,1)}}return}
+if(G.ph!='play'||s!=actor())return;const C=cfg(),p=G.pend;
+if(p){if(p.k=='t'){
+if(a.t=='q'){G.ti=p.p;G.rz=s;G.pend=null;log(nm(s)+T(': ¡Quiero!',': Aceito!'))}
+else if(a.t=='n'){log(nm(s)+T(': No quiero',': Correr'));G.pend=null;return endHand(p.from,C.lad[G.ti])}
+else if(a.t=='t'&&p.p+1<C.lad.length){G.ti=p.p;G.pend={k:'t',from:s,p:p.p+1};log(nm(s)+': ¡'+C.nm[p.p+1]+'!')}}
+else{const c=p.c,tot=l=>l.includes('f')?Math.max(1,C.tgt-Math.max(...G.sc)):l.reduce((a,x)=>a+(x=='e'?2:3),0);
+if(a.t=='q'){const e=G.o.map(ev),pts=tot(c),w=e[0]>e[1]||(e[0]==e[1]&&G.mano==0)?0:1;
+log('Envido: '+nm(0)+' '+e[0]+', '+nm(1)+' '+e[1]+' → +'+pts+' '+nm(w));G.ed=true;G.pend=null;add(w,pts)}
+else if(a.t=='n'){const pts=Math.max(1,tot(c.slice(0,-1)));log(nm(s)+': No quiero (+'+pts+' '+nm(p.from)+')');G.ed=true;G.pend=null;add(p.from,pts)}
+else if(a.t=='e'&&envOK(c,a.e)){G.pend={k:'e',from:s,c:[...c,a.e]};log(nm(s)+': ¡'+EN[a.e]+'!')}}return}
+if(a.t=='p'){const c=G.h[s][a.i];if(!c)return;G.h[s].splice(a.i,1);G.tb[s][G.rd]=c;
+if(G.tb[1-s][G.rd]){const x=str(G.tb[0][G.rd],G.v),y=str(G.tb[1][G.rd],G.v),w=x>y?0:y>x?1:-1;G.r.push(w);const d=decide();
+log(T('Baza ','Rodada ')+(G.rd+1)+': '+(w<0?T('parda','empate'):nm(w)));if(d>=0)return endHand(d,G.fix||C.lad[G.ti]);G.rd++;G.turn=w>=0?w:G.mano}else G.turn=1-s}
+else if(a.t=='t'&&canT(s)){G.pend={k:'t',from:s,p:G.ti+1};log(nm(s)+': ¡'+C.nm[G.ti+1]+'!')}
+else if(/^[erf]$/.test(a.e)&&a.t=='e'&&canE(s)){G.pend={k:'e',from:s,c:[a.e]};log(nm(s)+': ¡'+EN[a.e]+'!')}
+else if(a.t=='m'){log(nm(s)+T(' se va al mazo',' correu'));endHand(1-s,G.fix||C.lad[G.ti])}}
+function cpuMove(){const s=1,h=G.h[s],p=G.pend,C=cfg(),R=Math.random,S=h.map(c=>str(c,G.v)),best=Math.max(0,...S),avg=S.length?S.reduce((a,b)=>a+b)/S.length:0;
+const st=(best+avg)/2+G.r.filter(x=>x==1).length*2.5-G.r.filter(x=>x==0).length*2,e=ev(G.o[1]);
+if(G.ph=='onze')return avg+R()*3>6?{t:'q'}:{t:'n'};
+if(p){if(p.k=='t'){if(p.p+1<C.lad.length&&st>10.5&&R()<.4)return{t:'t'};return st+R()*4-2>5.5+p.p*.9?{t:'q'}:{t:'n'}}
+const L=p.c[p.c.length-1];if(e>=31&&envOK(p.c,'r')&&R()<.3)return{t:'e',e:'r'};return e+R()*3>(L=='f'?32:L=='r'?29:p.c.length>1?28:26)?{t:'q'}:{t:'n'}}
+if(canE(s)){if(e>=27&&R()<.6)return{t:'e',e:e>=31&&R()<.4?'r':'e'};if(R()<.06)return{t:'e',e:'e'}}
+if(canT(s)&&((st>9&&R()<.3)||R()<.04))return{t:'t'};
+const idx=S.map((x,i)=>i).sort((a,b)=>S[a]-S[b]);
+if(G.tb[0][G.rd]===undefined)return{t:'p',i:G.rd==0&&avg<8?idx[idx.length>>1]:idx[idx.length-1]};
+const x=str(G.tb[0][G.rd],G.v),w=idx.find(i=>S[i]>x);return{t:'p',i:w!==undefined?w:idx[0]}}
+function bc(){if(mode=='host'&&room&&G)room.emit('state',{...G,o:0,h:[G.h[0].map(()=>({})),G.h[1]]}).catch(()=>{})}
+const vs=()=>mode=='guest'?1:mode=='hot'?(G.ph=='play'||G.ph=='onze'?actor():0):0;
+function send(a){if(mode=='guest'){room.emit('act',{a}).catch(()=>{});return}doAct(vs(),a);render();bc()}
+function card(c,i,click){const f=BRZ(),L=f?FC(c.n):c.n,S=f?['♠','♣','♦','♥'][c.s]:SU[c.s],K=f?(c.s>1?'#c62828':'#111'):COL[c.s];return `<div class="c${click?' h':''}" ${click?`onclick="send({t:'p',i:${i}})"`:''} style="color:${K}${pn(c)?';box-shadow:0 0 0 3px gold':''}"><span>${L}</span><small>${S}</small></div>`}
+const back=n=>'<div class="c b"></div>'.repeat(n);
+function render(){const A=$('#app');if(!G){menu(A);return}
+const me=vs(),op=1-me,C=cfg(),ac=actor(),mine=G.ph=='play'&&ac==me;
+if(mode=='hot'){if(G.ph=='end')shownFor=-1;if((G.ph=='play'||G.ph=='onze')&&!G.over&&shownFor!=me){A.innerHTML=`<div class="cov"><h2>Turno de ${nm(me)}</h2><p>Pasale el dispositivo y que el otro jugador no mire.</p><button onclick="shownFor=${me};render()">Listo, soy ${nm(me)}</button></div>`;return}}
+let t='';for(let i=0;i<3;i++){const o=G.tb[op][i],m=G.tb[me][i];t+=`<div class="slot">${o?card(o):'<div class="c e"></div>'}${m?card(m):'<div class="c e"></div>'}</div>`}
+let b='';const mu=G.v=='bp'?`<div class="log" style="text-align:center;margin:0 0 6px">Vira: <b>${FC(G.m.n)}${['♠','♣','♦','♥'][G.m.s]}</b> · manilha: todos los ${FC(mn())} (♣ > ♥ > ♠ > ♦)</div>`:G.m?`<div class="log" style="text-align:center;margin:0 0 6px">Muestra: <b>${G.m.n}${SU[G.m.s]}</b> · piezas: 2, 4, 5, 11 y 10 de ${SU[G.m.s]}${PZ.includes(G.m.n)?` · el 12 de ${SU[G.m.s]} hace de ${G.m.n}`:''}</div>`:'';
+if(G.over)b=`<b>${G.win==me?T('¡Ganaste la partida!','Você ganhou o jogo!'):T('Perdiste la partida','Você perdeu o jogo')}</b><br><button onclick="quit()">Volver al menú</button>`;
+else if(G.ph=='end')b=`<button onclick="send({t:'next'})">${T('Siguiente mano','Próxima mão')}</button>`;
+else if(G.ph=='onze')b=ac==me?`<b>Mão de onze:</b> tenés 11 puntos. Si jugás, la mano vale 3 y no hay truco.<br><button onclick="send({t:'q'})">Jugar</button><button class="s" onclick="send({t:'n'})">Correr (+1 rival)</button>`:'Aguardando decisão…';
+else if(G.pend&&ac==me){const p=G.pend;
+if(p.k=='t')b=`<b>${nm(p.from)}: ¡${C.nm[p.p]}!</b><br><button onclick="send({t:'q'})">${BRZ()?'Aceito!':'¡Quiero!'}</button><button class="s" onclick="send({t:'n'})">${BRZ()?'Correr':'No quiero'}</button>`+(p.p+1<C.lad.length?`<button class="s" onclick="send({t:'t'})">${C.nm[p.p+1]}</button>`:'');
+else b=`<b>${nm(p.from)}: ¡${p.c.map(x=>EN[x]).join(' + ')}!</b><br><button onclick="send({t:'q'})">¡Quiero!</button><button class="s" onclick="send({t:'n'})">No quiero</button>`+['e','r','f'].filter(x=>envOK(p.c,x)).map(x=>`<button class="s" onclick="send({t:'e',e:'${x}'})">${EN[x]}</button>`).join('')}
+else if(G.pend)b=T('Esperando respuesta…','Aguardando resposta…');
+else if(mine){if(canT(me))b+=`<button onclick="send({t:'t'})">¡${C.nm[G.ti+1]}!</button>`;
+if(canE(me))b+=`<button class="s" onclick="send({t:'e',e:'e'})">Envido</button><button class="s" onclick="send({t:'e',e:'r'})">Real envido</button><button class="s" onclick="send({t:'e',e:'f'})">Falta envido</button>`;
+b+=`<button class="s" onclick="send({t:'m'})">${BRZ()?'Correr':'Al mazo'}</button>`}
+else b=T('Turno de ','Vez de ')+nm(ac)+'…';
+A.innerHTML=`<div class="top"><b>${C.n} · a ${C.tgt}</b><button class="s" onclick="quit()">Salir</button></div>
+<div class="sc">${mode=='cpu'||mode=='host'||mode=='guest'?T('Vos','Você'):nm(me)} <b>${G.sc[me]}</b> · ${nm(op)} <b>${G.sc[op]}</b></div>
+${mu}<div class="felt"><div class="row">${back(G.h[op].length)}</div><div class="tbl">${t}</div>
+<div class="row">${G.h[me].map((c,i)=>G.ferro?`<div class="c b${mine&&!G.pend?' h':''}" ${mine&&!G.pend?`onclick="send({t:'p',i:${i}})"`:''}></div>`:card(c,i,mine&&!G.pend)).join('')}</div></div>
+<div class="msg">${b}</div><div class="log">${G.log.slice(-5).reverse().map(x=>`<div>${esc(x)}</div>`).join('')}</div>`;
+clearTimeout(tm);if(mode=='cpu'&&!G.over&&(G.ph=='play'||G.ph=='onze')&&actor()==1)tm=setTimeout(()=>{doAct(1,cpuMove());render()},950)}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+function menu(A){A.innerHTML=`<h1>🃏 Truco</h1><p class="sub">Elegí la variante, leé cómo se juega y elegí cómo querés jugar.</p>`+
+Object.keys(CFG).map(k=>`<div class="opt ${sel==k?'on':''}"><label><input type="radio" name="v" ${sel==k?'checked':''} onchange="sel='${k}';menu($('#app'))"> ${CFG[k].n}</label><details><summary>Cómo se juega</summary>${TUT[k]}</details></div>`).join('')+
+`<p><button onclick="start('cpu')">🤖 Jugar contra la CPU</button><button onclick="start('hot')">👥 Dos jugadores, mismo dispositivo</button></p>
+<div class="opt"><b>🌐 Online</b><p class="sub" style="margin:4px 0 8px">Uno crea la sala y le pasa el código al otro, que abre esta misma página y lo ingresa.</p>
+<button onclick="mk()">Crear sala</button> <input id="cd" type="text" placeholder="código" maxlength="12"> <button class="s" onclick="jn()">Unirme</button><div id="st" class="sub">${esc(status)}</div></div>`}
+function start(m){mode=m;shownFor=-1;newGame(sel,m);render()}
+function quit(){clearTimeout(tm);if(room){room.leave().catch(()=>{});room=null}G=null;mode='';status='';render()}
+function wsRoom(name){return new Promise((res,rej)=>{const w=new WebSocket((location.protocol=='https:'?'wss://':'ws://')+location.host),h={};
+const r={emit:(t,d)=>{if(w.readyState==1)w.send(JSON.stringify({t,d}));return Promise.resolve()},on:(t,f)=>{(h[t]=h[t]||[]).push(f)},leave:()=>{w.close();return Promise.resolve()}};
+w.onopen=()=>w.send(JSON.stringify({j:name}));w.onerror=()=>rej('error');
+w.onmessage=e=>{const m=JSON.parse(e.data);if(m.ok)res(r);else if(m.err)rej(m.err);else(h[m.topic]||[]).forEach(f=>f({data:m.data,isMe:false}))}})}
+async function conn(code,host){code=code.toLowerCase().replace(/[^a-z0-9]/g,'');if(code.length<3){status='Código inválido';return render()}
+const R={join:wsRoom};if(!R){status='El modo online no está disponible en este visor.';return render()}
+try{room=await R.join('truco-'+code)}catch(e){status='No se pudo conectar.';return render()}
+mode=host?'host':'guest';
+if(host){status='Sala «'+code+'» creada. Esperando al rival…';render();
+room.on('hello',m=>{if(m.isMe)return;if(!G)newGame(sel,'on');bc();render()});
+room.on('act',m=>{if(m.isMe||!G||!m.data)return;doAct(1,m.data.a);render();bc()})}
+else{status='Conectando a «'+code+'»…';render();room.on('state',m=>{if(m.isMe||!m.data)return;G=m.data;render()});
+const iv=setInterval(()=>{if(G||!room)return clearInterval(iv);room.emit('hello',{}).catch(()=>{})},1500);room.emit('hello',{}).catch(()=>{})}}
+function mk(){const c=Math.random().toString(36).slice(2,7);conn(c,true)}
+function jn(){conn($('#cd').value,false)}
+render();
+</script></body></html>
